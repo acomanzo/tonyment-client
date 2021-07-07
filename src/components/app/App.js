@@ -53,7 +53,7 @@ function renderIcon(index) {
 function App() {
 
   const containerStyle = {
-    margin: '0px'
+    margin: '15px'
   };
 
   const [state, setState] = React.useState({
@@ -115,12 +115,14 @@ function App() {
         {list("left")}
       </Drawer>
 
-      <Switch>
-        <Route exact path='/' component={TourneyList} />
-        <Route path='/tourney/:id' component={TourneyDetail} />
-        <Route exact path='/user' component={UserList} />
-        <Route path='/user/:id' component={PlayerDetail} />
-      </Switch>
+      <div style={containerStyle}>
+        <Switch>
+          <Route exact path='/' component={TourneyList} />
+          <Route path='/tourney/:id' component={TourneyDetail} />
+          <Route exact path='/user' component={UserList} />
+          <Route path='/user/:id' component={PlayerDetail} />
+        </Switch>
+      </div>
     </div>
   );
 }

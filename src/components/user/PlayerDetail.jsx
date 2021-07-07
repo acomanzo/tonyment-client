@@ -1,5 +1,6 @@
 import Paper from '@material-ui/core/Paper';
 import { gql, useQuery } from '@apollo/client';
+import { makeStyles } from '@material-ui/core/styles';
 
 const USER_FIELDS = gql`
     fragment UserFields on User {
@@ -37,7 +38,15 @@ const GET_USER = gql`
     ${USER_FIELDS}
 `;
 
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        padding: '1%'
+    }
+  }));
+
 export default function PlayerDetail(props) {
+
+    const classes = useStyles();
 
     const { loading, error, data } = useQuery(GET_USER, {
         variables: {
@@ -60,7 +69,7 @@ export default function PlayerDetail(props) {
     const user = data.users[0];
 
     return (
-        <Paper>
+        <Paper className={classes.paper}>
             <h1>{user.tag}</h1>
             <div>
                 <h3>Tournies</h3>
