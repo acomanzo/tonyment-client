@@ -7,6 +7,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { gql, useQuery } from '@apollo/client';
+import { Link } from 'react-router-dom';
 
 const USER_FIELDS = gql`
     fragment UserFields on User {
@@ -36,7 +37,7 @@ export default function UserList(props) {
         return <p>Error!</p>
     }
 
-    // console.log(data);
+    console.log(data);
 
     return (
         <TableContainer component={Paper}>
@@ -50,7 +51,9 @@ export default function UserList(props) {
                     {data?.users?.map(user => (
                         <TableRow key={user.id}>
                             <TableCell component="th" scope="row">
-                                {user.tag}
+                                <Link to={`/user/${user.id}`}>
+                                    {user.tag}
+                                </Link>
                             </TableCell>
                         </TableRow>
                     ))}
