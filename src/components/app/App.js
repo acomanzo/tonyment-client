@@ -21,6 +21,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import EventIcon from '@material-ui/icons/Event';
 import PeopleIcon from '@material-ui/icons/People';
+import Tourney from '../tourney/Tourney';
+import Organize from '../organize/Organize';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -117,10 +119,11 @@ function App() {
 
       <div style={containerStyle}>
         <Switch>
-          <Route exact path='/' component={TourneyList} />
+          <Route exact path='/' component={Tourney} />
           <Route path='/tourney/:id' component={TourneyDetail} />
           <Route exact path='/user' component={UserList} />
           <Route path='/user/:id' component={PlayerDetail} />
+          <Route exact path='/organize' component={Organize} />
         </Switch>
       </div>
     </div>
