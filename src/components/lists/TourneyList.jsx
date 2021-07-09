@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -11,6 +11,8 @@ import { Link } from 'react-router-dom';
 import Fab from '@material-ui/core/Fab';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
+import { AuthContext } from '../app/App';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const TOURNEY_FIELDS = gql`
     fragment TourneyFields on Tourney {
@@ -48,6 +50,10 @@ export default function TourneyList(props) {
     const classes = useStyles();
 
     const { loading, error, data } = useQuery(ALL_TOURNIES);
+
+    const { loginWithRedirect } = useAuth0();
+
+    const isAuthenticated = useContext(AuthContext)
 
     const onSubmit = input => {
         console.log(input);
@@ -93,18 +99,22 @@ export default function TourneyList(props) {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Link 
-                to={{
-                    pathname: '/organize',
-                    state: {
-                        onSubmit: 'JSON.stringify(onSubmit)'
-                    }
-                }} 
-            >
-                <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
+            {isAuthenticated ? 
+                <Link to={'/organize'} >
+                    <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
+                        <AddIcon />
+                    </Fab>
+                </Link>
+                :
+                <Fab 
+                    onClick={() => loginWithRedirect({
+                        redirectUri: 'http://localhost:3000/organize'
+                    })} 
+                    aria-label={'Add'} 
+                    className={classes.fab} color={'primary'}>
                     <AddIcon />
                 </Fab>
-            </Link>
+            }
         </>
     );
 }

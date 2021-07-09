@@ -2,7 +2,6 @@ import React from 'react';
 import logo from '../../assets/logo.svg';
 import './App.css';
 import UserList from '../lists/UserList';
-import TourneyList from '../lists/TourneyList';
 import TourneyDetail from '../tourney/TourneyDetail';
 import { Route, Switch } from 'react-router-dom';
 import PlayerDetail from '../user/PlayerDetail';
@@ -23,6 +22,7 @@ import EventIcon from '@material-ui/icons/Event';
 import PeopleIcon from '@material-ui/icons/People';
 import Tourney from '../tourney/Tourney';
 import Organize from '../organize/Organize';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -52,7 +52,13 @@ function renderIcon(index) {
   }
 }
 
+export const AuthContext = React.createContext(false);
+
 function App() {
+
+  const { loginWithRedirect } = useAuth0();
+
+  const { user, isAuthenticated, isLoading, logout } = useAuth0();
 
   const containerStyle = {
     margin: '15px'
@@ -101,7 +107,11 @@ function App() {
           <Typography variant="h6" className={classes.title}>
             Tonyrment.gg
           </Typography>
-          <Button color="inherit">Login</Button>
+          {isAuthenticated ? 
+            <Button color="inherit" onClick={() => logout({returnTo: window.location.origin})}>Logout</Button> 
+            : 
+            <Button color="inherit" onClick={() => loginWithRedirect()}>Login</Button>
+          }
         </Toolbar>
       </AppBar>
 
@@ -119,11 +129,13 @@ function App() {
 
       <div style={containerStyle}>
         <Switch>
-          <Route exact path='/' component={Tourney} />
-          <Route path='/tourney/:id' component={TourneyDetail} />
-          <Route exact path='/user' component={UserList} />
-          <Route path='/user/:id' component={PlayerDetail} />
-          <Route exact path='/organize' component={Organize} />
+          <AuthContext.Provider value={isAuthenticated} >
+            <Route exact path='/' component={Tourney} />
+            <Route path='/tourney/:id' component={TourneyDetail} />
+            <Route exact path='/user' component={UserList} />
+            <Route path='/user/:id' component={PlayerDetail} />
+            <Route exact path='/organize' component={Organize} />
+          </AuthContext.Provider>
         </Switch>
       </div>
     </div>
