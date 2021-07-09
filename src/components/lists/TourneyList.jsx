@@ -8,6 +8,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { gql, useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
+import Fab from '@material-ui/core/Fab';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import AddIcon from '@material-ui/icons/Add';
 
 const TOURNEY_FIELDS = gql`
     fragment TourneyFields on Tourney {
@@ -32,9 +35,23 @@ const ALL_TOURNIES = gql`
     ${TOURNEY_FIELDS}
 `;
 
+const useStyles = makeStyles(theme => ({
+    fab: {
+        position: 'absolute', 
+        bottom: theme.spacing(2), 
+        right: theme.spacing(2)
+    }
+}));
+
 export default function TourneyList(props) {
 
+    const classes = useStyles();
+
     const { loading, error, data } = useQuery(ALL_TOURNIES);
+
+    const onSubmit = input => {
+        console.log(input);
+    }
 
     if (loading) {
         return <p>Loading...</p>
@@ -44,36 +61,50 @@ export default function TourneyList(props) {
         return <p>Error!</p>
     }
 
-    // console.log(data);
+    console.log(data);
 
     return (
-        <TableContainer component={Paper}>
-            <Table size="small" aria-label="a dense table">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell align="right">Date</TableCell>
-                        <TableCell align="right">Time</TableCell>
-                        <TableCell align="right">Status</TableCell>
-                        <TableCell align="right">Winner</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {data?.tourneys?.map(tourney => (
-                        <TableRow key={tourney.id}>
-                            <TableCell component="th" scope="row">
-                                <Link to={`/tourney/${tourney.id}`}>
-                                    {tourney.name}
-                                </Link>
-                            </TableCell>
-                            <TableCell align="right">{tourney.date}</TableCell>
-                            <TableCell align="right">{tourney.time}</TableCell>
-                            <TableCell align="right">{tourney.status}</TableCell>
-                            <TableCell align="right">{tourney.winner ? tourney.winner : "N/A"}</TableCell>
+        <>
+            <TableContainer component={Paper}>
+                <Table size="small" aria-label="a dense table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell align="right">Date</TableCell>
+                            <TableCell align="right">Time</TableCell>
+                            <TableCell align="right">Status</TableCell>
+                            <TableCell align="right">Winner</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                        {data?.tourneys?.map(tourney => (
+                            <TableRow key={tourney.id}>
+                                <TableCell component="th" scope="row">
+                                    <Link to={`/tourney/${tourney.id}`}>
+                                        {tourney.name}
+                                    </Link>
+                                </TableCell>
+                                <TableCell align="right">{tourney.date}</TableCell>
+                                <TableCell align="right">{tourney.time}</TableCell>
+                                <TableCell align="right">{tourney.status}</TableCell>
+                                <TableCell align="right">{tourney.winner ? tourney.winner : "N/A"}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Link 
+                to={{
+                    pathname: '/organize',
+                    state: {
+                        onSubmit: 'JSON.stringify(onSubmit)'
+                    }
+                }} 
+            >
+                <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
+                    <AddIcon />
+                </Fab>
+            </Link>
+        </>
     );
 }
