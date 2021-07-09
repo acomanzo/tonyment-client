@@ -84,20 +84,20 @@ export default function PlayerDetail(props) {
         <Paper className={classes.paper}>
             <h1>{user.tag}</h1>
             <div>
-                <h3>Tournies</h3>
+                <h3>Tournies Entered</h3>
                 <ul>
                     {
-                        user.tournies_participated.map(tourney => (
+                        user.tournies_entered.map(tourney => (
                             <li>{tourney.name}</li>
                         ))
                     }
                 </ul>
             </div>
             <div>
-                <h3>Sets</h3>
+                <h3>Sets Played</h3>
                 <ul>
                     {
-                        user.sets.map(set => (
+                        user.sets_played.map(set => (
                             <li>{`${set.record} (${set.winner.tag}): ${set.competitors[0].tag} vs ${set.competitors[1].tag}`}</li>
                         ))
                     }

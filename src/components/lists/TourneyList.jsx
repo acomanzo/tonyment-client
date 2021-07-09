@@ -55,10 +55,6 @@ export default function TourneyList(props) {
 
     const isAuthenticated = useContext(AuthContext)
 
-    const onSubmit = input => {
-        console.log(input);
-    }
-
     if (loading) {
         return <p>Loading...</p>
     }

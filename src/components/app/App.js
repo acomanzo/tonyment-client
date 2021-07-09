@@ -23,6 +23,35 @@ import PeopleIcon from '@material-ui/icons/People';
 import Tourney from '../tourney/Tourney';
 import Organize from '../organize/Organize';
 import { useAuth0 } from '@auth0/auth0-react';
+import { gql, useQuery, useMutation } from '@apollo/client';
+
+const USER_FIELDS = gql`
+    fragment UserFields on User {
+        id
+        email
+        tag
+    }
+`;
+
+const GET_USER = gql`
+    query getUser($user: UserWhere) {
+        users(where: $user) {
+            ...UserFields
+        }
+    }
+    ${USER_FIELDS}
+`;
+
+const NEW_USER = gql`
+    mutation CreateUser($newUser: [UserCreateInput!]!) {
+      createUsers(input: $newUser) {
+        users {
+          ...UserFields
+        }
+      }
+    }
+    ${USER_FIELDS}
+`;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,6 +88,36 @@ function App() {
   const { loginWithRedirect } = useAuth0();
 
   const { user, isAuthenticated, isLoading, logout } = useAuth0();
+
+  let id, email, tag;
+  if (user) {
+    id = user.sub;
+    email = user.email;
+    tag = email.substring(0, email.indexOf('@'));
+  }
+
+  const [createUser, newUser] = useMutation(NEW_USER);
+
+  const { loading, error, data } = useQuery(GET_USER, {
+    variables: {
+      user: {
+        id: id, 
+      }
+    },
+    onCompleted: data => {
+      if (data.users.length === 0 && id && email && tag) {
+        createUser({
+          variables: {
+            newUser: {
+              id: id, 
+              email: email, 
+              tag: tag
+            }
+          }
+        });
+      }
+    }
+  });
 
   const containerStyle = {
     margin: '15px'
@@ -110,7 +169,7 @@ function App() {
           {isAuthenticated ? 
             <Button color="inherit" onClick={() => logout({returnTo: window.location.origin})}>Logout</Button> 
             : 
-            <Button color="inherit" onClick={() => loginWithRedirect()}>Login</Button>
+            <Button color="inherit" onClick={() => loginWithRedirect()}>Login or Sign up</Button>
           }
         </Toolbar>
       </AppBar>
