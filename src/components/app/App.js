@@ -81,7 +81,10 @@ function renderIcon(index) {
   }
 }
 
-export const AuthContext = React.createContext(false);
+export const AuthContext = React.createContext({
+  isAuthenticated: false, 
+  userId: ''
+});
 
 function App() {
 
@@ -188,7 +191,7 @@ function App() {
 
       <div style={containerStyle}>
         <Switch>
-          <AuthContext.Provider value={isAuthenticated} >
+          <AuthContext.Provider value={{isAuthenticated: isAuthenticated, userId: id}} >
             <Route exact path='/' component={Tourney} />
             <Route path='/tourney/:id' component={TourneyDetail} />
             <Route exact path='/user' component={UserList} />

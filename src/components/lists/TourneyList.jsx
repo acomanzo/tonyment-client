@@ -53,7 +53,7 @@ export default function TourneyList(props) {
 
     const { loginWithRedirect } = useAuth0();
 
-    const isAuthenticated = useContext(AuthContext)
+    const { isAuthenticated } = useContext(AuthContext)
 
     if (loading) {
         return <p>Loading...</p>

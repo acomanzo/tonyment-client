@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Paper from '@material-ui/core/Paper';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 import Grid from '@material-ui/core/Grid';
 import PlayerCard from '../user/PlayerCard';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Confirmation from './Confirmation';
+import { AuthContext } from '../app/App';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const TOURNEY_FIELDS = gql`
     fragment TourneyFields on Tourney {
@@ -54,6 +56,17 @@ const GET_TOURNEY = gql`
     ${TOURNEY_FIELDS}
 `;
 
+const TOURNEY_CONNECT_COMPETITOR = gql`
+    mutation tourneyConnectCompetitor($where: TourneyWhere, $connect: TourneyConnectInput) {
+        updateTourneys(where: $where, connect: $connect) {
+            tourneys {
+                ...TourneyFields
+            }
+        }
+    }
+    ${TOURNEY_FIELDS}
+`;
+
 const useStyles = makeStyles({
     paper: {
         padding: '1%'
@@ -66,21 +79,38 @@ export default function TourneyDetail(props) {
 
     const [modal, setModal] = useState(false);
 
+    const { isAuthenticated, userId } = useContext(AuthContext);
+
+    const { loginWithRedirect } = useAuth0();
+
+    const [updateTourney, updatedTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
+        update(cache, {data: {updateTourneys}}) {
+            const data = cache.readQuery({
+                query: GET_TOURNEY,
+                variables: {
+                    tourney: {
+                        id: props.match.params.id
+                    }
+                }
+            });
+            cache.writeQuery({
+                query: GET_TOURNEY,
+                variables: {
+                    tourney: {
+                        id: props.match.params.id
+                    }
+                },
+                data: {tourneys: [updateTourneys.tourneys[0]]}
+            });
+        }
+    });
+
     const openModal = () => {
         setModal(true);
     };
 
     const closeModal = () => {
         setModal(false);
-    };
-
-    const register = e => {
-        setModal(false);
-
-        // update tourney node (competitors)
-
-        
-        // update player node (tournies_entered)
     };
 
     const { loading, error, data } = useQuery(GET_TOURNEY, {
@@ -101,6 +131,26 @@ export default function TourneyDetail(props) {
 
     console.log(data.tourneys[0]);
     const tourney = data.tourneys[0];
+
+    const register = e => {
+        setModal(false);
+
+        // connect tourney to competitor 
+        updateTourney({
+            variables: {
+                where: {
+                    id: tourney.id,
+                },
+                connect: {
+                    competitors: {
+                        where: {
+                            id: userId
+                        }
+                    }
+                }
+            }
+        });
+    };
 
     // const competitors = [
     //     {id: 1, tag: "tony"}, 
@@ -135,7 +185,11 @@ export default function TourneyDetail(props) {
                 </Paper>
             </Grid>
             <Grid item xs>
-                <Button onClick={openModal} variant="contained">Register Now</Button>
+                {isAuthenticated ?
+                    <Button onClick={openModal} variant="contained">Register Now</Button>
+                    :
+                    <Button variant="contained" disabled>Login before registering</Button>
+                }
                 <Confirmation open={modal} register={register} onClose={closeModal} tourney={tourney} />
             </Grid>
         </Grid>
