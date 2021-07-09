@@ -77,7 +77,7 @@ export default function Organize(props) {
                     name: name, 
                     date: date,
                     time: time,
-                    status: "IN_PROGRESS"
+                    status: "NOT_STARTED"
                 }
             }
         });

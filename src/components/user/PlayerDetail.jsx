@@ -6,25 +6,37 @@ const USER_FIELDS = gql`
     fragment UserFields on User {
         id
         tag
-        tournies_won {
+        sets_won {
             id
-            name
-        }
-        tournies_participated {
-            id
-            name
-        }
-        sets {
-            id
-            record
+            record 
             competitors {
-                id
+                id 
                 tag
             }
+        }
+        sets_played {
+            id
+            record
             winner {
                 id
                 tag
             }
+            competitors {
+                id
+                tag
+            }
+        }
+        brackets_won {
+            id
+            name
+        }
+        tournies_won {
+            id
+            name
+        }
+        tournies_entered {
+            id
+            name
         }
     }
 `;
