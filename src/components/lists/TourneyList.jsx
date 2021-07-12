@@ -63,8 +63,6 @@ export default function TourneyList(props) {
         return <p>Error!</p>
     }
 
-    console.log(data);
-
     return (
         <>
             <TableContainer component={Paper}>

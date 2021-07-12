@@ -9,7 +9,19 @@ import { Auth0Provider } from '@auth0/auth0-react';
 
 const client = new ApolloClient({
   uri: 'http://localhost:4000', 
-  cache: new InMemoryCache()
+  cache: new InMemoryCache({
+    typePolicies: {
+      Tourney: {
+        fields: {
+          competitors: {
+            merge(existing, incoming) {
+              return incoming
+            }
+          }
+        }
+      },
+    }
+  })
 });
 
 ReactDOM.render(

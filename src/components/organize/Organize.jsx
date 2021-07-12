@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
@@ -7,12 +7,13 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import { gql, useMutation } from '@apollo/client';
 import { useHistory } from 'react-router-dom';
+import { AuthContext } from '../app/App';
 
 const useStyles = makeStyles({
     form: {
         padding: '1%'
     }
-})
+});
 
 const TOURNEY_FIELDS = gql`
     fragment TourneyFields on Tourney {
@@ -57,6 +58,8 @@ export default function Organize(props) {
 
     const history = useHistory();
 
+    const { userId } = useContext(AuthContext);
+
     const [createTourney, newTourney] = useMutation(NEW_TOURNEY, {
         update(cache, {data: {createTourneys}}) {
             const data = cache.readQuery({query: ALL_TOURNIES});
@@ -77,7 +80,14 @@ export default function Organize(props) {
                     name: name, 
                     date: date,
                     time: time,
-                    status: "NOT_STARTED"
+                    status: "NOT_STARTED",
+                    organizer: {
+                        connect: {
+                            where: {
+                                id: userId
+                            }
+                        }
+                    }
                 }
             }
         });

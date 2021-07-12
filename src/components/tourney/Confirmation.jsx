@@ -11,7 +11,12 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />
 });
 
-export default function Confirmation({open, register, onClose, tourney}) {
+export default function Confirmation({open, register, onClose, tourney, registering}) {
+
+    let dialogContentText = registering ? `By registering, you agree to compete in ${tourney.name}.` : 
+        `By deregistering, you will lose your place in ${tourney.name} and will have to reregister if you change your mind.`;
+
+    let acceptText = registering ? `Sign me up!` : `Deregister 😭`;
 
     return (
         <div>
@@ -26,7 +31,7 @@ export default function Confirmation({open, register, onClose, tourney}) {
                 <DialogTitle id="alert-dialog-slide-title">Register Now?</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
-                        By registering, you agree to compete in {tourney.name}. 
+                        {dialogContentText}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -34,7 +39,7 @@ export default function Confirmation({open, register, onClose, tourney}) {
                         Cancel
                     </Button>
                     <Button onClick={register} color="primary">
-                        Sign me up!
+                        {acceptText}
                     </Button>
                 </DialogActions>
             </Dialog>

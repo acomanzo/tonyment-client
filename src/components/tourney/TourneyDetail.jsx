@@ -7,45 +7,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Confirmation from './Confirmation';
 import { AuthContext } from '../app/App';
-import { useAuth0 } from '@auth0/auth0-react';
-
-const TOURNEY_FIELDS = gql`
-    fragment TourneyFields on Tourney {
-        id
-        name
-        date
-        time
-        status
-        bracket {
-            id
-            sets {
-                id
-                record
-                status
-                winner {
-                    id
-                    tag
-                }
-                competitors {
-                    id
-                    tag
-                }
-            }
-            winner {
-                id
-                tag
-            }
-        }
-        winner {
-            id
-            tag
-        }
-        competitors {
-            id
-            tag
-        }
-    }
-`;
+import Snackbar from '@material-ui/core/Snackbar';
+import { TOURNEY_FIELDS } from '../../fragments';
 
 const GET_TOURNEY = gql`
     query getTourney($tourney: TourneyWhere) {
@@ -67,6 +30,17 @@ const TOURNEY_CONNECT_COMPETITOR = gql`
     ${TOURNEY_FIELDS}
 `;
 
+const TOURNEY_DISCONNECT_COMPETITOR = gql`
+    mutation tourneyDisconnectCompetitor($where: TourneyWhere, $disconnect: TourneyDisconnectInput) {
+        updateTourneys(where: $where, disconnect: $disconnect) {
+            tourneys {
+                ...TourneyFields
+            }
+        }
+    }
+    ${TOURNEY_FIELDS}
+`;
+
 const useStyles = makeStyles({
     paper: {
         padding: '1%'
@@ -79,11 +53,11 @@ export default function TourneyDetail(props) {
 
     const [modal, setModal] = useState(false);
 
+    const [snackbar, setSnackbar] = useState(false);
+
     const { isAuthenticated, userId } = useContext(AuthContext);
 
-    const { loginWithRedirect } = useAuth0();
-
-    const [updateTourney, updatedTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
+    const [connectTourney, connectedTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
         update(cache, {data: {updateTourneys}}) {
             const data = cache.readQuery({
                 query: GET_TOURNEY,
@@ -102,7 +76,29 @@ export default function TourneyDetail(props) {
                 },
                 data: {tourneys: [updateTourneys.tourneys[0]]}
             });
-        }
+        },
+    });
+
+    const [disconnectTourney, disconnectedTourney] = useMutation(TOURNEY_DISCONNECT_COMPETITOR, {
+        update(cache, {data: {updateTourneys}}) {
+            const data = cache.readQuery({
+                query: GET_TOURNEY, 
+                variables: {
+                    tourney: {
+                        id: props.match.params.id 
+                    }
+                }
+            });
+            cache.writeQuery({
+                query: GET_TOURNEY, 
+                variables: {
+                    tourney: {
+                        id: props.match.params.id 
+                    }
+                },
+                data: {tourneys: [updateTourneys.tourneys[0]]}
+            });
+        },
     });
 
     const openModal = () => {
@@ -129,14 +125,13 @@ export default function TourneyDetail(props) {
         return <p>Error!</p>
     }
 
-    console.log(data.tourneys[0]);
     const tourney = data.tourneys[0];
 
     const register = e => {
-        setModal(false);
 
-        // connect tourney to competitor 
-        updateTourney({
+        setModal(false);
+        
+        connectTourney({
             variables: {
                 where: {
                     id: tourney.id,
@@ -150,7 +145,55 @@ export default function TourneyDetail(props) {
                 }
             }
         });
+
+        setSnackbar(true);
     };
+
+    const deregister = e => {
+        
+        setModal(false);
+
+        disconnectTourney({
+            variables: {
+                where: {
+                    id: tourney.id 
+                },
+                disconnect: {
+                    competitors: {
+                        where: {
+                            id: userId
+                        }
+                    }
+                }
+            },
+        });
+
+        setSnackbar(true);
+    };
+
+    function registerButton() {
+
+        if (isAuthenticated) {
+            const isRegistered = tourney.competitors.find(competitor => competitor.id === userId) !== undefined;
+            return (
+                <>
+                    <Button onClick={openModal} variant="contained">{isRegistered ? 'Deregister' : 'Register now'}</Button>
+                    <Confirmation open={modal} register={() => isRegistered ? deregister() : register()} onClose={closeModal} tourney={tourney} registering={!isRegistered} />
+
+                    <Snackbar 
+                        open={snackbar} 
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        autoHideDuration={3000} 
+                        onClose={() => setSnackbar(false)}
+                        message={isRegistered ? "Successfully registered" : "Successfully deregistered"}
+                        key={"bottom" + "right"}
+                    /> 
+                </>
+            );
+        }
+
+        return <Button variant="contained" disabled>Login to register</Button>
+    }
 
     // const competitors = [
     //     {id: 1, tag: "tony"}, 
@@ -185,12 +228,7 @@ export default function TourneyDetail(props) {
                 </Paper>
             </Grid>
             <Grid item xs>
-                {isAuthenticated ?
-                    <Button onClick={openModal} variant="contained">Register Now</Button>
-                    :
-                    <Button variant="contained" disabled>Login before registering</Button>
-                }
-                <Confirmation open={modal} register={register} onClose={closeModal} tourney={tourney} />
+                {registerButton()}
             </Grid>
         </Grid>
     );
