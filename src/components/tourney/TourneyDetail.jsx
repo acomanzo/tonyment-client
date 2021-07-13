@@ -9,6 +9,8 @@ import Confirmation from './Confirmation';
 import { AuthContext } from '../app/App';
 import Snackbar from '@material-ui/core/Snackbar';
 import { TOURNEY_FIELDS } from '../../fragments';
+import Bracket from './Bracket';
+import { ConfirmationContext } from './Confirmation';
 
 const GET_TOURNEY = gql`
     query getTourney($tourney: TourneyWhere) {
@@ -173,37 +175,37 @@ export default function TourneyDetail(props) {
 
     function registerButton() {
 
-        if (isAuthenticated) {
-            const isRegistered = tourney.competitors.find(competitor => competitor.id === userId) !== undefined;
-            return (
-                <>
-                    <Button onClick={openModal} variant="contained">{isRegistered ? 'Deregister' : 'Register now'}</Button>
-                    <Confirmation open={modal} register={() => isRegistered ? deregister() : register()} onClose={closeModal} tourney={tourney} registering={!isRegistered} />
+        if (tourney.status === 'NOT_STARTED') {
+            if (isAuthenticated) {
+                const isRegistered = tourney.competitors.find(competitor => competitor.id === userId) !== undefined;
+                return (
+                    <>
+                        <Button onClick={openModal} variant="contained">{isRegistered ? 'Deregister' : 'Register now'}</Button>
+                        <Confirmation 
+                            open={modal} 
+                            confirm={() => isRegistered ? deregister() : register()} 
+                            onClose={closeModal} 
+                            tourney={tourney} 
+                            context={{registering: !isRegistered, purpose: ConfirmationContext.REGISTRATION}} 
+                        />
 
-                    <Snackbar 
-                        open={snackbar} 
-                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                        autoHideDuration={3000} 
-                        onClose={() => setSnackbar(false)}
-                        message={isRegistered ? "Successfully registered" : "Successfully deregistered"}
-                        key={"bottom" + "right"}
-                    /> 
-                </>
-            );
+                        <Snackbar 
+                            open={snackbar} 
+                            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                            autoHideDuration={3000} 
+                            onClose={() => setSnackbar(false)}
+                            message={isRegistered ? "Successfully registered" : "Successfully deregistered"}
+                            key={"bottom" + "right"}
+                        /> 
+                    </>
+                );
+            }
+
+            return <Button variant="contained" disabled>Login to register</Button>
+        } else {
+            return <Button variant="contained" disabled>Registration closed</Button>
         }
-
-        return <Button variant="contained" disabled>Login to register</Button>
     }
-
-    // const competitors = [
-    //     {id: 1, tag: "tony"}, 
-    //     {id: 2, tag: "matt"}, 
-    //     {id: 3, tag: "mayank"},
-    //     {id: 4, tag: "jonny"},
-    //     {id: 5, tag: "james"},
-    //     {id: 6, tag: "james"}, 
-    //     {id: 7, tag: "lucas"}
-    // ]
 
     return (
         <Grid container spacing={2}>
@@ -213,6 +215,7 @@ export default function TourneyDetail(props) {
                     <p>{`${tourney.date} at ${tourney.time}`}</p>
                     <p>{tourney.status}</p>
                     <p>{tourney.winner ? `1st place: ${tourney.winner}` : "Winner undecided"}</p>
+                    {registerButton()}                    
                 </Paper>
             </Grid>
             <Grid item xs={6}>
@@ -227,8 +230,8 @@ export default function TourneyDetail(props) {
                     </Grid>
                 </Paper>
             </Grid>
-            <Grid item xs>
-                {registerButton()}
+            <Grid item xs={12}>
+                <Bracket bracket={tourney.bracket} />
             </Grid>
         </Grid>
     );

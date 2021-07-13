@@ -55,17 +55,22 @@ export const TOURNEY_FIELDS = gql`
         status
         bracket {
             id
-            sets {
+            rounds {
                 id
-                record
+                name
                 status
-                winner {
+                sets {
                     id
-                    tag
-                }
-                competitors {
-                    id
-                    tag
+                    record
+                    status
+                    winner {
+                        id
+                        tag
+                    }
+                    competitors {
+                        id
+                        tag
+                    }
                 }
             }
             winner {

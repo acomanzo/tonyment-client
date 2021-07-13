@@ -1,9 +1,11 @@
+import { useContext } from 'react';
 import Paper from '@material-ui/core/Paper';
 import { gql, useQuery } from '@apollo/client';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import { USER_FIELDS } from '../../fragments';
 import TODashboard from './TODashboard';
+import { AuthContext } from '../app/App';
 
 const GET_USER = gql`
     query getUser($user: UserWhere) {
@@ -23,6 +25,8 @@ const useStyles = makeStyles((theme) => ({
 export default function PlayerDetail(props) {
 
     const classes = useStyles();
+
+    const { userId } = useContext(AuthContext);
 
     const { loading, error, data } = useQuery(GET_USER, {
         variables: {
@@ -71,7 +75,7 @@ export default function PlayerDetail(props) {
                     </ul>
                 </div>
             </Paper>
-            <TODashboard tournies={user.tournies_organized} />
+            {userId === user.id ? <TODashboard tournies={user.tournies_organized} /> : <></>}
         </>
     );
 }

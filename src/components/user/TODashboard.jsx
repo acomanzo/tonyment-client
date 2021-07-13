@@ -10,6 +10,8 @@ import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import { gql, useQuery, useMutation } from '@apollo/client';
+import { Link } from 'react-router-dom';
+import Confirmation, { ConfirmationContext } from '../tourney/Confirmation';
 
 const useStyles = makeStyles(() => ({
     paper: {
@@ -53,7 +55,18 @@ function TODashboardTourneyCard({tourney}) {
 
     const [status, setStatus] = useState(tourney.status);
 
+    const [saveChangesModal, setSaveChangesModal] = useState(false);
+    const [finalizeBracketModal, setFinalizeBracketModal] = useState(false);
+
     const [updateTourney, updatedTourney] = useMutation(UPDATE_TOURNEY);
+
+    const openModal = (setModal) => {
+        setModal(true);
+    };
+
+    const closeModal = (setModal) => {
+        setModal(false);
+    };
 
     const saveChanges = () => {
         updateTourney({
@@ -66,6 +79,15 @@ function TODashboardTourneyCard({tourney}) {
                 },
             },
         });
+
+        setSaveChangesModal(false);
+    };
+
+    const finalizeBracket = () => {
+        // do mutation to seed bracket 
+        
+
+        setFinalizeBracketModal(false);
     };
 
     const handleChange = e => {
@@ -84,7 +106,9 @@ function TODashboardTourneyCard({tourney}) {
     return (
         <div style={containerStyle}>
             <div style={headingStyle}>
-                <h3>{tourney.name}</h3>
+                <Link to={`/tourney/${tourney.id}`} >
+                    <h3>{tourney.name}</h3>
+                </Link>
                 <p>{`${tourney.date}, ${tourney.time}`}</p>
                 <FormControl>
                     <InputLabel>Status</InputLabel>
@@ -94,15 +118,29 @@ function TODashboardTourneyCard({tourney}) {
                         onChange={handleChange}
                     >
                         <MenuItem value={"NOT_STARTED"}>Not started</MenuItem>
+                        <MenuItem value={"REGISTRATION_CLOSED"}>Registration closed</MenuItem>
                         <MenuItem value={"IN_PROGRESS"}>In progress</MenuItem>
                         <MenuItem value={"FINISHED"}>Finished</MenuItem>
                     </Select>
                 </FormControl>
             </div>
             <div>
-                <Button onClick={saveChanges}>
+                <Button onClick={() => openModal(setSaveChangesModal)}>
                     Save changes
                 </Button>
+                <Confirmation 
+                    open={saveChangesModal} 
+                    confirm={saveChanges} 
+                    onClose={() => closeModal(setSaveChangesModal)} 
+                    context={{purpose: ConfirmationContext.TO_SAVE_CHANGES}} 
+                />
+                <Button onClick={() => openModal(setFinalizeBracketModal)}>Finalize Bracket</Button>
+                <Confirmation 
+                    open={finalizeBracketModal} 
+                    confirm={finalizeBracket} 
+                    onClose={() => closeModal(setFinalizeBracketModal)} 
+                    context={{purpose: ConfirmationContext.TO_FINALIZE_BRACKET}} 
+                />
             </div>
         </div>
     );
