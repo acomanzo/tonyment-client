@@ -167,7 +167,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Tonyrment.gg
+            Tonyment.gg
           </Typography>
           {isAuthenticated ? 
             <Button color="inherit" onClick={() => logout({returnTo: window.location.origin})}>Logout</Button> 
