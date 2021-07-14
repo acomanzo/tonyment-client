@@ -81,6 +81,12 @@ export default function Organize(props) {
                     date: date,
                     time: time,
                     status: "NOT_STARTED",
+                    bracket: {
+                        create: {
+                            name: "winners", 
+                            isFinalized: false,
+                        },
+                    },
                     organizer: {
                         connect: {
                             where: {
