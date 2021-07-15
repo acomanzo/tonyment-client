@@ -37,8 +37,6 @@ export default function UserList(props) {
         return <p>Error!</p>
     }
 
-    console.log(data);
-
     return (
         <TableContainer component={Paper}>
             <Table size="small" aria-label="a dense table">

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { USER_FIELDS } from '../../fragments';
 import TODashboard from './TODashboard';
 import { AuthContext } from '../app/App';
+import { Status } from './TODashboard';
 
 const GET_USER = gql`
     query getUser($user: UserWhere) {
@@ -46,30 +47,64 @@ export default function PlayerDetail(props) {
 
     const user = data.users[0];
 
+    let tourneys_entered = [];
+    for (const tourney of user.tournies_entered) {
+        tourneys_entered.push({ 
+            id: tourney.id, 
+            name: tourney.name, 
+            sets_played: [] 
+        });
+    }
+    for (const set of user.sets_played) {
+        const id = set.round.bracket.tourney.id;
+        for (let i = 0; i < tourneys_entered.length; i++) {
+            if (tourneys_entered[i].id === id) {
+                tourneys_entered[i].sets_played.push(set);
+            }
+        }
+    }
+
     return (
         <>
             <Paper className={classes.paper}>
                 <h1>{user.tag}</h1>
                 <div>
-                    <h3>Tournies Entered: {user.tournies_entered.length}</h3>
-                    <ul>
-                        {
-                            user.tournies_entered.map(tourney => (
-                                <li>
+                    <h2>Tournies Entered: {user.tournies_entered.length}</h2>
+                    {
+                        tourneys_entered.map(tourney => (
+                            <>
+                                <h3>
                                     <Link to={`/tourney/${tourney.id}`}>
                                         {tourney.name}
                                     </Link>
-                                </li>
-                            ))
-                        }
-                    </ul>
+                                </h3>
+                                <ul>
+                                    {tourney.sets_played.map(set => (
+                                        <li>
+                                            { set.status === Status.FINISHED ?
+                                                `${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}` 
+                                                :
+                                                `Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`
+                                            }
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ))
+                    }
                 </div>
                 <div>
                     <h3>Sets Played: {user.sets_played.length}</h3>
                     <ul>
                         {
                             user.sets_played.map(set => (
-                                <li>{`${set.record} (${set.winner.tag}): ${set.competitors[0].tag} vs ${set.competitors[1].tag}`}</li>
+                                <li>
+                                    { set.status === Status.FINISHED ?
+                                        `${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}` 
+                                        :
+                                        `Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`
+                                    }
+                                </li>
                             ))
                         }
                     </ul>

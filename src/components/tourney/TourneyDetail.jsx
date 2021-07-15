@@ -9,7 +9,7 @@ import Confirmation from './Confirmation';
 import { AuthContext } from '../app/App';
 import Snackbar from '@material-ui/core/Snackbar';
 import { TOURNEY_FIELDS } from '../../fragments';
-import Bracket from './Bracket';
+import TBracket from './Bracket';
 import { ConfirmationContext } from './Confirmation';
 
 const GET_TOURNEY = gql`
@@ -231,7 +231,7 @@ export default function TourneyDetail(props) {
                 </Paper>
             </Grid>
             <Grid item xs={12}>
-                <Bracket bracket={tourney.bracket} />
+                <TBracket tourney={tourney} />
             </Grid>
         </Grid>
     );

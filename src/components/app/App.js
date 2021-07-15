@@ -20,6 +20,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import EventIcon from '@material-ui/icons/Event';
 import PeopleIcon from '@material-ui/icons/People';
+import PersonIcon from '@material-ui/icons/Person';
 import Tourney from '../tourney/Tourney';
 import Organize from '../organize/Organize';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -78,6 +79,8 @@ function renderIcon(index) {
       return <EventIcon />
     case 1:
       return <PeopleIcon />
+    case 2:
+      return <PersonIcon />
   }
 }
 
@@ -145,7 +148,7 @@ function App() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {[{text: 'Tourneys', path: '/'}, {text: 'Users', path: '/user'}].map((item, index) => (
+        {[{text: 'Tourneys', path: '/'}, {text: 'Users', path: '/user'}, {text: 'Profile', path: `/user/${id}`}].map((item, index) => (
           <Link to={item.path} >
             <ListItem button key={item.text}>
                 <ListItemIcon>{renderIcon(index)}</ListItemIcon>

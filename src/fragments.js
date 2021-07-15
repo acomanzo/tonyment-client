@@ -14,6 +14,7 @@ export const USER_FIELDS = gql`
         }
         sets_played {
             id
+            status
             record
             winner {
                 id
@@ -23,6 +24,17 @@ export const USER_FIELDS = gql`
                 id
                 tag
             }
+            round {
+                id
+                bracket {
+                    id 
+                    tourney {
+                        id
+                        name
+                    }
+                }
+            }
+            created_at
         }
         brackets_won {
             id
@@ -42,6 +54,13 @@ export const USER_FIELDS = gql`
             date
             time
             status
+            bracket {
+                id
+                name
+                isFinalized
+                created_at
+            }
+            created_at
         }
     }
 `;
