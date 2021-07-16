@@ -212,7 +212,7 @@ function TODashboardTourneyCard({tourney}) {
         let setId = '';
         for (let j = 0; j < competitors.length; j++) {
             const competitor = competitors[j];
-            if (j % 2 == 0) {
+            if (j % 2 === 0) {
                 const result = await createSet({
                     variables: {
                         input: {

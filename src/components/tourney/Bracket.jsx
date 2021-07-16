@@ -13,7 +13,7 @@ function makeBracket(tourney) {
         let index = 0;
         for (let i = 0; i < tourney.competitors.length; i++) {
             const competitor = { name: tourney.competitors[i].tag }
-            if (i % 2 == 0) {
+            if (i % 2 === 0) {
                 sets.push({ competitors: [ competitor ] });
                 index = sets.length - 1;
             } else {
