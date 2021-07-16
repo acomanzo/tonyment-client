@@ -20,7 +20,7 @@ export const Status = {
 
 const useStyles = makeStyles(() => ({
     paper: {
-        padding: '1%',
+        padding: '0 1% 1% 1%',
     }
 }));
 
@@ -48,7 +48,7 @@ const UPDATE_BRACKET = gql`
     }
 `;
 
-const CREATE_ROUND_ONE = gql`
+const CREATE_ROUND = gql`
     mutation createRoundOne($input: [RoundCreateInput!]!) {
         createRounds(input: $input) {
             rounds {
@@ -79,8 +79,8 @@ const CREATE_SET = gql`
 `;
 
 const UPDATE_SET = gql`
-    mutation updateSet($where: TSetWhere, $update: TSetUpdateInput) {
-        updateTSets(where: $where, update: $update) {
+    mutation updateSet($where: TSetWhere, $update: TSetUpdateInput, $connect: TSetConnectInput) {
+        updateTSets(where: $where, update: $update, connect: $connect) {
             tSets {
                 id
             }
@@ -119,7 +119,7 @@ function TODashboardTourneyCard({tourney}) {
 
     const [updateBracket, updatedBracket] = useMutation(UPDATE_BRACKET);
 
-    const [createRoundOne, _] = useMutation(CREATE_ROUND_ONE);
+    const [createRound, _] = useMutation(CREATE_ROUND);
 
     const [createSet, __] = useMutation(CREATE_SET);
 
@@ -149,7 +149,8 @@ function TODashboardTourneyCard({tourney}) {
     };
 
     const finalizeBracket = () => {
-        seedRoundOne();
+        // seedRoundOne();
+        seedBracket();
         updateBracket({
             variables: {
                 where: {
@@ -176,10 +177,15 @@ function TODashboardTourneyCard({tourney}) {
         setFinalizeBracketModal(false);
     }
 
+    const seedBracket = async () => {
+        const setIdsRoundOne = await seedRoundOne();
+        seedRestOfBracket(setIdsRoundOne);
+    }
+
     const seedRoundOne = async () => {
 
         // make round 1
-        const result = await createRoundOne({
+        const result = await createRound({
             variables: {
                 input: {
                     name: "Round 1", 
@@ -202,6 +208,7 @@ function TODashboardTourneyCard({tourney}) {
         const round = result.data.createRounds.rounds[0];
         const competitors = round.bracket.tourney.competitors;
 
+        let setIds = [];
         let setId = '';
         for (let j = 0; j < competitors.length; j++) {
             const competitor = competitors[j];
@@ -228,6 +235,7 @@ function TODashboardTourneyCard({tourney}) {
                     },
                 });
                 setId = result.data.createTSets.tSets[0].id;
+                setIds.push(setId);
             } else {
                 await updateSet({
                     variables: {
@@ -247,7 +255,101 @@ function TODashboardTourneyCard({tourney}) {
                 });
             }
         }
+
+        return setIds;
     };
+
+    const seedRestOfBracket = async (setIdsRoundOne) => {
+        let counter = setIdsRoundOne.length / 2;
+        let depth = 2;
+        let rounds = [setIdsRoundOne];
+
+        while (counter >= 1) {
+
+            const result = await createRound({
+                variables: {
+                    input: {
+                        name: `Round ${depth}`, 
+                        status: "NOT_STARTED", 
+                        bracket: {
+                            connect: {
+                                where: {
+                                    name: "winners", 
+                                    tourney: {
+                                        id: tourney.id,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            const round = result.data.createRounds.rounds[0];
+
+            let setIds = [];
+
+            for (let i = 0; i < counter * 2; i++) {
+                const progressed_from = rounds[rounds.length - 1][i];
+
+                if (i % 2 === 0) {
+                    const result = await createSet({
+                        variables: {
+                            input: {
+                                status: "NOT_STARTED", 
+                                round: {
+                                    connect: {
+                                        where: {
+                                            id: round.id, 
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    });
+                    const setId = result.data.createTSets.tSets[0].id;
+                    setIds.push(setId);
+
+                    // update set with progressed from because wont work on creation
+                    await updateSet({
+                        variables: {
+                            where: {
+                                id: setId, 
+                            },
+                            connect: {
+                                competitors_progressed_from: {
+                                    where: {
+                                        id: progressed_from, 
+                                    },
+                                },
+                            },
+                        },
+                    });
+                } else {
+                    const progressed_to = setIds[i - 1];
+
+                    await updateSet({
+                        variables: {
+                            where: {
+                                id: progressed_to, 
+                            },
+                            connect: {
+                                competitors_progressed_from: {
+                                    where: {
+                                        id: progressed_from,
+                                    },
+                                },
+                            },
+                        },
+                    });
+                }
+            }
+
+            rounds.push(setIds);
+            counter /= 2;
+            depth++;
+        }
+    }
 
     const handleChange = e => {
         setStatus(e.target.value);

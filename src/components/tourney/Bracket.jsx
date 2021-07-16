@@ -4,7 +4,7 @@ import { Bracket } from 'react-brackets';
 // seeds bracket in order registered 
 function makeBracket(tourney) {
 
-    if (tourney.bracket[0].length === 0) {
+    if (tourney.bracket[0].rounds.length === 0) {
 
         let rounds = [];
         let sets = [];
@@ -109,20 +109,34 @@ function adapt(tourney) {
         let newBracket = {
             rounds: [],
         };
-        for (const round of bracket.rounds) {
+        const rounds = bracket.isFinalized ? JSON.parse(JSON.stringify(bracket.rounds)).reverse() : bracket.rounds;
+        for (const round of rounds) {
+            
             let newRound = {
                 title: round.name,
                 seeds: [],
             };
             let counter = 1;
             for (const set of round.sets) {
-                const competitor1 = set.competitors[0].name ? set.competitors[0] : { name: set.competitors[0].tag }
-                const competitor2 = set.competitors[1] ? set.competitors[1] : { name: 'buy'};
+
+                let competitor1 = { name: 'undecided' };
+                let competitor2 = { name: 'undecided' };
+
+                if (set.competitors.length > 0) {
+                    competitor1 = set.competitors[0].name ? set.competitors[0] : { name: set.competitors[0].tag };
+                    competitor2 = set.competitors[1] ? 
+                        set.competitors[1].name ? set.competitors[1] : { name: set.competitors[1].tag } : 
+                        { name: 'buy'};
+                }
+
                 let newSet = {
                     id: counter, 
                     date: `Date TBD`,
-                    teams: [ competitor1, competitor2 ],
-                } 
+                    teams: [ 
+                        competitor1, 
+                        competitor2,
+                    ],
+                };
                 newRound.seeds.push(newSet);
                 counter++;
             }

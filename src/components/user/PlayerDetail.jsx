@@ -19,7 +19,7 @@ const GET_USER = gql`
 
 const useStyles = makeStyles((theme) => ({
     paper: {
-        padding: '1%'
+        padding: '0 1% 1% 1%'
     }
   }));
 

@@ -92,6 +92,7 @@ export const TOURNEY_FIELDS = gql`
                     }
                 }
             }
+            isFinalized
             winner {
                 id
                 tag
