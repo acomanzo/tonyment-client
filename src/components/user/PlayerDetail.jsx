@@ -8,6 +8,7 @@ import TODashboard from './TODashboard';
 import { AuthContext } from '../app/App';
 import { Status } from './TODashboard';
 import ReportSet from './ReportSet';
+import { TOURNEY_FIELDS } from '../../fragments';
 
 const GET_USER = gql`
     query getUser($user: UserWhere) {
@@ -32,9 +33,33 @@ const UPDATE_SET = gql`
                 competitors_progress_to {
                     id
                 }
+                round {
+                    id
+                    name 
+                    sets {
+                        id
+                    }
+                    bracket {
+                        id
+                        tourney {
+                            id
+                        }
+                    }
+                }
             }
         }
     }
+`;
+
+const UPDATE_TOURNEY = gql`
+    mutation updateTourney($where: TourneyWhere, $update: TourneyUpdateInput, $connect: TourneyConnectInput) {
+        updateTourneys(where: $where, update: $update, connect: $connect) {
+            tourneys {
+                ...TourneyFields
+            }
+        }
+    }
+    ${TOURNEY_FIELDS}
 `;
 
 const useStyles = makeStyles((theme) => ({
@@ -45,18 +70,9 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PlayerDetail(props) {
 
-    const [showReport, setShowReport] = useState(false);
-
-    const handleOpenReport = () => {
-        setShowReport(true);
-    };
-
-    const handleCloseReport = () => {
-        setShowReport(false);
-    };
-
-    const submitReport = async (set, winnerId, wins, loses) => {
-
+    const submitReport = async (set, winnerId, wins, loses, setState) => {
+        console.log(set);
+        console.log(winnerId);
         const result = await updateSet({
             variables: {
                 where: {
@@ -76,27 +92,46 @@ export default function PlayerDetail(props) {
             },
         });
 
-        // const setId = result.data.updateTSets.tSets[0].id;
-        // const progressTo = result.data.updateTSets.tSets[0].competitors_progress_to[0].id;
+        // console.log(result);
         
-        console.log(result);
+        if (result.data.updateTSets.tSets[0].round.sets.length > 1) {
+            const progressTo = result.data.updateTSets.tSets[0].competitors_progress_to[0].id;
+            updateSet({
+                variables: {
+                    where: {
+                        id: progressTo, 
+                    },
+                    connect: {
+                        competitors: {
+                            where: {
+                                id: winnerId, 
+                            },
+                        },
+                    },
+                },
+            });
+        } else {
+            const tourneyId = result.data.updateTSets.tSets[0].round.bracket.tourney.id;
+            updateTourney({
+                variables: {
+                    where: {
+                        id: tourneyId, 
+                    },
+                    update: {
+                        status: Status.FINISHED,
+                        winner: {
+                            connect: {
+                                where: {
+                                    id: winnerId, 
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
 
-        // updateSet({
-        //     variables: {
-        //         where: {
-        //             id: progressTo, 
-        //         },
-        //         connect: {
-        //             competitors: {
-        //                 where: {
-        //                     id: winnerId, 
-        //                 },
-        //             },
-        //         },
-        //     },
-        // });
-
-        setShowReport(false);
+        setState(false);
     };
 
     const classes = useStyles();
@@ -104,6 +139,8 @@ export default function PlayerDetail(props) {
     const { userId } = useContext(AuthContext);
 
     const [updateSet, _] = useMutation(UPDATE_SET);
+
+    const [updateTourney, __] = useMutation(UPDATE_TOURNEY);
 
     const { loading, error, data } = useQuery(GET_USER, {
         variables: {
@@ -149,27 +186,31 @@ export default function PlayerDetail(props) {
                     <h2>Tournies Entered: {user.tournies_entered.length}</h2>
                     {
                         tourneys_entered.map(tourney => (
-                            <>
+                            <div key={tourney.id}>
                                 <h3>
-                                    <Link to={`/tourney/${tourney.id}`}>
+                                    <Link to={`/tourney/${tourney.id}`} >
                                         {tourney.name}
                                     </Link>
                                 </h3>
                                 <ul>
                                     {tourney.sets_played.map(set => (
-                                        <>
-                                            <li onClick={handleOpenReport} className="set-item" >
-                                                { set.status === Status.FINISHED ?
-                                                    `${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}` 
-                                                    :
-                                                    `Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`
-                                                }
-                                            </li>
-                                            <ReportSet open={showReport} onClose={handleCloseReport} submit={submitReport} set={set} />
-                                        </>
+                                        <SetItem 
+                                            key={set.id}
+                                            set={set}
+                                            submitReport={submitReport}
+                                        />
+                                        // <div key={set.id}>
+                                        //     <li onClick={handleOpenReport} className="set-item">
+                                        //         { set.status === Status.FINISHED ?
+                                        //             (`${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`) :
+                                        //             (`Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`)
+                                        //         }
+                                        //     </li>
+                                        //     <ReportSet open={showReport} onClose={handleCloseReport} submit={submitReport} set={set} />
+                                        // </div>
                                     ))}
                                 </ul>
-                            </>
+                            </div>
                         ))
                     }
                 </div>
@@ -178,7 +219,7 @@ export default function PlayerDetail(props) {
                     <ul>
                         {
                             user.sets_played.map(set => (
-                                <li>
+                                <li key={set.id}>
                                     { set.status === Status.FINISHED ?
                                         `${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}` 
                                         :
@@ -192,5 +233,30 @@ export default function PlayerDetail(props) {
             </Paper>
             {userId === user.id ? <TODashboard tournies={user.tournies_organized} /> : <></>}
         </>
+    );
+}
+
+function SetItem({set, submitReport}) {
+
+    const [showReport, setShowReport] = useState(false);
+
+    const handleOpenReport = () => {
+        setShowReport(true);
+    };
+
+    const handleCloseReport = () => {
+        setShowReport(false);
+    }; 
+
+    return (
+        <div> 
+            <li onClick={handleOpenReport} className="set-item">
+                { set.status === Status.FINISHED ?
+                    (`${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`) :
+                    (`Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`)
+                }
+            </li>
+            <ReportSet open={showReport} onClose={handleCloseReport} submit={submitReport} set={set} setShowReport={setShowReport} />
+        </div>
     );
 }

@@ -97,7 +97,7 @@ export default function TODashboard({tournies}) {
             <Paper className={classes.paper}>
                 <h1>TO Dashboard</h1>
                 {tournies.map(tourney => (
-                    <TODashboardTourneyCard tourney={tourney} />
+                    <TODashboardTourneyCard tourney={tourney} key={tourney.id} />
                 ))}
             </Paper>
         );

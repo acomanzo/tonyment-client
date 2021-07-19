@@ -6,10 +6,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-export default function ReportSet({open, onClose, submit, set}) {
+export default function ReportSet({open, onClose, submit, set, setShowReport}) {
 
     const competitor1 = set.competitors[0].tag;
-    const competitor2 = set.competitors[1] ? set.competitors[1].name : 'buy';
+    const competitor2 = set.competitors[1] ? set.competitors[1].tag : 'buy';
 
     const contentStyle = {
         display: 'grid', 
@@ -18,22 +18,18 @@ export default function ReportSet({open, onClose, submit, set}) {
         justifyItems: 'center',
     };
 
-    console.log(set);
-
-    console.log(set.competitors);
-
     const onSubmit = () => {
         const c1Wins = document.getElementById('competitor-1-wins').value;
         const c2Wins = document.getElementById('competitor-2-wins').value;
 
         const c1Id = set.competitors[0].id;
-        const c2 = set.competitors;
-
-        if (c2) {
+        
+        if (set.competitors.length > 1) {
+            const c2Id = set.competitors[1].id;
             const c1Won = c1Wins > c2Wins;
-            c1Won ? submit(set, c1Id, c1Wins, c2Wins) : submit(set, c2.id, c2Wins, c1Wins);
+            c1Won ? submit(set, c1Id, c1Wins, c2Wins, setShowReport) : submit(set, c2Id, c2Wins, c1Wins, setShowReport);
         } else {
-            submit(set, c1Id, c1Wins, 0);
+            submit(set, c1Id, c1Wins, 0, setShowReport);
         }
     };
 
@@ -50,8 +46,18 @@ export default function ReportSet({open, onClose, submit, set}) {
                 <div style={contentStyle}>
                     <div>{competitor1}</div>
                     <div>{competitor2}</div>
-                    <input id="competitor-1-wins" type="number" step="1" disabled={set.record === null ? false : true} />
-                    <input id="competitor-2-wins" type="number" step="1" disabled={set.record === null ? false : true} />
+                    <ReportSetInput 
+                        competitorNumber={1}
+                        record={set.record}
+                        winner={set.winner}
+                        competitorTag={competitor1}
+                    />
+                    <ReportSetInput 
+                        competitorNumber={2}
+                        record={set.record}
+                        winner={set.winner}
+                        competitorTag={competitor2}
+                    />
                 </div>
             </DialogContent>
             <DialogActions>
@@ -64,4 +70,33 @@ export default function ReportSet({open, onClose, submit, set}) {
             </DialogActions>
         </Dialog>
     );
+}
+
+function ReportSetInput({competitorNumber, record, winner, competitorTag}) {
+    const id = competitorNumber === 1 ? 'competitor-1-wins' : 'competitor-2-wins';
+    const type = 'number';
+    const step = '1';
+    const disabled = record === null ? false : true;
+
+    if (winner) {
+        const value = competitorTag === winner.tag ? record.substring(0, 1) : record.substring(2);
+        return (
+            <input 
+                id={id} 
+                type={type}
+                step={step}
+                disabled={disabled}
+                value={value}
+            />
+        );
+    } else {
+        return (
+            <input 
+                id={id} 
+                type={type}
+                step={step}
+                disabled={disabled}
+            />
+        );
+    }
 }

@@ -149,7 +149,7 @@ function App() {
     >
       <List>
         {[{text: 'Tourneys', path: '/'}, {text: 'Users', path: '/user'}, {text: 'Profile', path: `/user/${id}`}].map((item, index) => (
-          <Link to={item.path} >
+          <Link to={item.path} key={item.text}>
             <ListItem button key={item.text}>
                 <ListItemIcon>{renderIcon(index)}</ListItemIcon>
                 <ListItemText primary={item.text} />

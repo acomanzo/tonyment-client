@@ -16,13 +16,13 @@ const client = new ApolloClient({
         fields: {
           competitors: {
             merge(existing, incoming) {
-              return incoming
-            }
-          }
-        }
+              return incoming;
+            },
+          },
+        },
       },
-    }
-  })
+    },
+  }),
 });
 
 ReactDOM.render(

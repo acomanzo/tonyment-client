@@ -214,7 +214,7 @@ export default function TourneyDetail(props) {
                     <h1>{tourney.name}</h1>
                     <p>{`${tourney.date} at ${tourney.time}`}</p>
                     <p>{tourney.status}</p>
-                    <p>{tourney.winner ? `1st place: ${tourney.winner}` : "Winner undecided"}</p>
+                    <p>{tourney.winner ? `1st place: ${tourney.winner.tag}` : "Winner undecided"}</p>
                     {registerButton()}                    
                 </Paper>
             </Grid>

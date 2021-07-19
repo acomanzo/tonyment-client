@@ -87,7 +87,7 @@ export default function TourneyList(props) {
                                 <TableCell align="right">{tourney.date}</TableCell>
                                 <TableCell align="right">{tourney.time}</TableCell>
                                 <TableCell align="right">{tourney.status}</TableCell>
-                                <TableCell align="right">{tourney.winner ? tourney.winner : "N/A"}</TableCell>
+                                <TableCell align="right">{tourney.winner ? tourney.winner.tag : "N/A"}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
