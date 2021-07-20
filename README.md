@@ -1,3 +1,14 @@
+# Tonyment.gg
+Tonyment is an app for creating and organizing tournaments that drew inspiration from smash.gg and is built with the GRANDstack. 
+Features include:
+1. Authentication
+2. Creating tournaments
+3. Entering tournaments with automatic bracket updates 
+4. A TO dashboard for closing registration/saving changes to tourneys 
+5. Tourney browser
+6. User browser
+7. Profile pages with set reporting mechanism
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
