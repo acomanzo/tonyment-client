@@ -3,7 +3,7 @@ import logo from '../../assets/logo.svg';
 import './App.css';
 import UserList from '../lists/UserList';
 import TourneyDetail from '../tourney/TourneyDetail';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 import PlayerDetail from '../user/PlayerDetail';
 import Drawer from '@material-ui/core/Drawer';
 import ListItem from '@material-ui/core/ListItem';
@@ -17,7 +17,6 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
 import EventIcon from '@material-ui/icons/Event';
 import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
@@ -25,14 +24,7 @@ import Tourney from '../tourney/Tourney';
 import Organize from '../organize/Organize';
 import { useAuth0 } from '@auth0/auth0-react';
 import { gql, useQuery, useMutation } from '@apollo/client';
-
-const USER_FIELDS = gql`
-    fragment UserFields on User {
-        id
-        email
-        tag
-    }
-`;
+import { USER_FIELDS } from '../../fragments';
 
 const GET_USER = gql`
     query getUser($user: UserWhere) {
@@ -102,9 +94,17 @@ function App() {
     tag = email.substring(0, email.indexOf('@'));
   }
 
-  const [createUser, newUser] = useMutation(NEW_USER);
+  const [createUser] = useMutation(NEW_USER, {
+    refetchQueries: [
+      { query: GET_USER, variables: {
+        user: {
+          id: user ? user.sub : '', 
+        }
+      }},
+    ],
+  });
 
-  const { loading, error, data } = useQuery(GET_USER, {
+  useQuery(GET_USER, {
     variables: {
       user: {
         id: id, 
@@ -149,12 +149,14 @@ function App() {
     >
       <List>
         {[{text: 'Tourneys', path: '/'}, {text: 'Users', path: '/user'}, {text: 'Profile', path: `/user/${id}`}].map((item, index) => (
-          <Link to={item.path} key={item.text}>
-            <ListItem button key={item.text}>
+          item.text === 'Profile' && !isAuthenticated ? <></> : (
+            <Link to={item.path} key={item.text}>
+              <ListItem button key={item.text}>
                 <ListItemIcon>{renderIcon(index)}</ListItemIcon>
                 <ListItemText primary={item.text} />
-            </ListItem>
-          </Link>
+              </ListItem>
+            </Link>
+          ) 
         ))}
       </List>
     </div>
@@ -173,8 +175,7 @@ function App() {
             Tonyment.gg
           </Typography>
           {isAuthenticated ? 
-            <Button color="inherit" onClick={() => logout({returnTo: window.location.origin})}>Logout</Button> 
-            : 
+            <Button color="inherit" onClick={() => logout({returnTo: window.location.origin})}>Logout</Button> : 
             <Button color="inherit" onClick={() => loginWithRedirect()}>Login or Sign up</Button>
           }
         </Toolbar>

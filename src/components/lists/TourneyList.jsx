@@ -98,8 +98,7 @@ export default function TourneyList(props) {
                     <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
                         <AddIcon />
                     </Fab>
-                </Link>
-                :
+                </Link> :
                 <Fab 
                     onClick={() => loginWithRedirect({
                         redirectUri: 'http://localhost:3000/organize'

@@ -71,8 +71,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PlayerDetail(props) {
 
     const submitReport = async (set, winnerId, wins, loses, setState) => {
-        console.log(set);
-        console.log(winnerId);
+
         const result = await updateSet({
             variables: {
                 where: {
@@ -91,8 +90,6 @@ export default function PlayerDetail(props) {
                 },
             },
         });
-
-        // console.log(result);
         
         if (result.data.updateTSets.tSets[0].round.sets.length > 1) {
             const progressTo = result.data.updateTSets.tSets[0].competitors_progress_to[0].id;
@@ -160,60 +157,19 @@ export default function PlayerDetail(props) {
 
     const user = data.users[0];
 
-    let tourneys_entered = [];
-    for (const tourney of user.tournies_entered) {
-        tourneys_entered.push({ 
-            id: tourney.id, 
-            name: tourney.name, 
-            sets_played: [] 
-        });
-    }
-    for (const set of user.sets_played) {
-        const id = set.round.bracket.tourney.id;
-        for (let i = 0; i < tourneys_entered.length; i++) {
-            if (tourneys_entered[i].id === id) {
-                tourneys_entered[i].sets_played.push(set);
-            }
-        }
-    }
-
     return (
         <>
             <Paper className={classes.paper}>
                 <h1>{user.tag}</h1>
                 <p>{user.email}</p>
-                <div>
-                    <h2>Tournies Entered: {user.tournies_entered.length}</h2>
-                    {
-                        tourneys_entered.map(tourney => (
-                            <div key={tourney.id}>
-                                <h3>
-                                    <Link to={`/tourney/${tourney.id}`} >
-                                        {tourney.name}
-                                    </Link>
-                                </h3>
-                                <ul>
-                                    {tourney.sets_played.map(set => (
-                                        <SetItem 
-                                            key={set.id}
-                                            set={set}
-                                            submitReport={submitReport}
-                                        />
-                                        // <div key={set.id}>
-                                        //     <li onClick={handleOpenReport} className="set-item">
-                                        //         { set.status === Status.FINISHED ?
-                                        //             (`${set.record}: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`) :
-                                        //             (`Undecided: ${set.competitors[0].tag} vs ${set.competitors.length > 1 ? set.competitors[1].tag : 'buy'}`)
-                                        //         }
-                                        //     </li>
-                                        //     <ReportSet open={showReport} onClose={handleCloseReport} submit={submitReport} set={set} />
-                                        // </div>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))
-                    }
-                </div>
+                {user.tournies_entered.length > 0 ? 
+                    <TourneySetList 
+                        tournies_entered={user.tournies_entered} 
+                        sets_played={user.sets_played} 
+                        submitReport={submitReport} 
+                    /> : 
+                    <></>
+                }
                 <div>
                     <h3>Sets Played: {user.sets_played.length}</h3>
                     <ul>
@@ -233,6 +189,52 @@ export default function PlayerDetail(props) {
             </Paper>
             {userId === user.id ? <TODashboard tournies={user.tournies_organized} /> : <></>}
         </>
+    );
+}
+
+function TourneySetList({tournies_entered, sets_played, submitReport}) {
+
+    let tourneys_entered = [];
+    for (const tourney of tournies_entered) {
+        tourneys_entered.push({ 
+            id: tourney.id, 
+            name: tourney.name, 
+            sets_played: [] 
+        });
+    }
+    for (const set of sets_played) {
+        const id = set.round.bracket.tourney.id;
+        for (let i = 0; i < tourneys_entered.length; i++) {
+            if (tourneys_entered[i].id === id) {
+                tourneys_entered[i].sets_played.push(set);
+            }
+        }
+    }
+
+    return (
+        <div>
+            <h2>Tournies Entered: {tourneys_entered.length}</h2>
+            {
+                tourneys_entered.map(tourney => (
+                    <div key={tourney.id}>
+                        <h3>
+                            <Link to={`/tourney/${tourney.id}`} >
+                                {tourney.name}
+                            </Link>
+                        </h3>
+                        <ul>
+                            {tourney.sets_played.map(set => (
+                                <SetItem 
+                                    key={set.id}
+                                    set={set}
+                                    submitReport={submitReport}
+                                />
+                            ))}
+                        </ul>
+                    </div>
+                ))
+            }
+        </div>
     );
 }
 
