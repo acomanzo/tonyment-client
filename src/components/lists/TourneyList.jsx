@@ -13,6 +13,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import { AuthContext } from '../app/App';
 import { useAuth0 } from '@auth0/auth0-react';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const TOURNEY_FIELDS = gql`
     fragment TourneyFields on Tourney {
@@ -95,18 +96,22 @@ export default function TourneyList(props) {
             </TableContainer>
             {isAuthenticated ? 
                 <Link to={'/organize'} >
-                    <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
+                    <Tooltip title="Create tourney" aria-label="create-tourney">
+                        <Fab aria-label={'Add'} className={classes.fab} color={'primary'}>
+                            <AddIcon />
+                        </Fab>
+                    </Tooltip>
+                </Link> :
+                <Tooltip title="Create tourney" aria-label="create-tourney">
+                    <Fab 
+                        onClick={() => loginWithRedirect({
+                            redirectUri: 'http://localhost:3000/organize'
+                        })} 
+                        aria-label={'Add'} 
+                        className={classes.fab} color={'primary'}>
                         <AddIcon />
                     </Fab>
-                </Link> :
-                <Fab 
-                    onClick={() => loginWithRedirect({
-                        redirectUri: 'http://localhost:3000/organize'
-                    })} 
-                    aria-label={'Add'} 
-                    className={classes.fab} color={'primary'}>
-                    <AddIcon />
-                </Fab>
+                </Tooltip>
             }
         </>
     );
