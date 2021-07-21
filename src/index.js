@@ -9,7 +9,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000', 
+  uri: 'https://6ugtvf4dua.execute-api.us-east-1.amazonaws.com/dev/graphql', 
   cache: new InMemoryCache({
     typePolicies: {
       Tourney: {
