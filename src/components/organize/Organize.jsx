@@ -60,7 +60,7 @@ export default function Organize(props) {
 
     const { userId } = useContext(AuthContext);
 
-    const [createTourney, newTourney] = useMutation(NEW_TOURNEY, {
+    const [createTourney] = useMutation(NEW_TOURNEY, {
         update(cache, {data: {createTourneys}}) {
             const data = cache.readQuery({query: ALL_TOURNIES});
             cache.writeQuery({

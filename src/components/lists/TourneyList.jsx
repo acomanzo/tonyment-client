@@ -9,7 +9,7 @@ import Paper from '@material-ui/core/Paper';
 import { gql, useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import Fab from '@material-ui/core/Fab';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import { AuthContext } from '../app/App';
 import { useAuth0 } from '@auth0/auth0-react';

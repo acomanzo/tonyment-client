@@ -59,16 +59,16 @@ export default function TourneyDetail(props) {
 
     const { isAuthenticated, userId } = useContext(AuthContext);
 
-    const [connectTourney, connectedTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
+    const [connectTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
         update(cache, {data: {updateTourneys}}) {
-            const data = cache.readQuery({
-                query: GET_TOURNEY,
-                variables: {
-                    tourney: {
-                        id: props.match.params.id
-                    }
-                }
-            });
+            // const data = cache.readQuery({
+            //     query: GET_TOURNEY,
+            //     variables: {
+            //         tourney: {
+            //             id: props.match.params.id
+            //         }
+            //     }
+            // });
             cache.writeQuery({
                 query: GET_TOURNEY,
                 variables: {
@@ -81,16 +81,16 @@ export default function TourneyDetail(props) {
         },
     });
 
-    const [disconnectTourney, disconnectedTourney] = useMutation(TOURNEY_DISCONNECT_COMPETITOR, {
+    const [disconnectTourney] = useMutation(TOURNEY_DISCONNECT_COMPETITOR, {
         update(cache, {data: {updateTourneys}}) {
-            const data = cache.readQuery({
-                query: GET_TOURNEY, 
-                variables: {
-                    tourney: {
-                        id: props.match.params.id 
-                    }
-                }
-            });
+            // const data = cache.readQuery({
+            //     query: GET_TOURNEY, 
+            //     variables: {
+            //         tourney: {
+            //             id: props.match.params.id 
+            //         }
+            //     }
+            // });
             cache.writeQuery({
                 query: GET_TOURNEY, 
                 variables: {
@@ -195,7 +195,7 @@ export default function TourneyDetail(props) {
                             autoHideDuration={3000} 
                             onClose={() => setSnackbar(false)}
                             message={isRegistered ? "Successfully registered" : "Successfully deregistered"}
-                            key={"bottom" + "right"}
+                            key={"bottomright"}
                         /> 
                     </>
                 );

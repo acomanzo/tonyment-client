@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from '../../assets/logo.svg';
 import './App.css';
 import UserList from '../lists/UserList';
 import TourneyDetail from '../tourney/TourneyDetail';
@@ -73,6 +72,8 @@ function renderIcon(index) {
       return <PeopleIcon />
     case 2:
       return <PersonIcon />
+    default:
+      return <PersonIcon />
   }
 }
 
@@ -85,7 +86,7 @@ function App() {
 
   const { loginWithRedirect } = useAuth0();
 
-  const { user, isAuthenticated, isLoading, logout } = useAuth0();
+  const { user, isAuthenticated, logout } = useAuth0();
 
   let id, email, tag;
   if (user) {
@@ -149,7 +150,7 @@ function App() {
     >
       <List>
         {[{text: 'Tourneys', path: '/'}, {text: 'Users', path: '/user'}, {text: 'Profile', path: `/user/${id}`}].map((item, index) => (
-          item.text === 'Profile' && !isAuthenticated ? <></> : (
+          item.text === 'Profile' && !isAuthenticated ? <div key={index}></div> : (
             <Link to={item.path} key={item.text}>
               <ListItem button key={item.text}>
                 <ListItemIcon>{renderIcon(index)}</ListItemIcon>

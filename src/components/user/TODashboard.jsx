@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
@@ -115,15 +114,15 @@ function TODashboardTourneyCard({tourney}) {
     const [saveChangesModal, setSaveChangesModal] = useState(false);
     const [finalizeBracketModal, setFinalizeBracketModal] = useState(false);
 
-    const [updateTourney, updatedTourney] = useMutation(UPDATE_TOURNEY);
+    const [updateTourney] = useMutation(UPDATE_TOURNEY);
 
-    const [updateBracket, updatedBracket] = useMutation(UPDATE_BRACKET);
+    const [updateBracket] = useMutation(UPDATE_BRACKET);
 
-    const [createRound, _] = useMutation(CREATE_ROUND);
+    const [createRound] = useMutation(CREATE_ROUND);
 
-    const [createSet, __] = useMutation(CREATE_SET);
+    const [createSet] = useMutation(CREATE_SET);
 
-    const [updateSet, ___] = useMutation(UPDATE_SET);
+    const [updateSet] = useMutation(UPDATE_SET);
 
     const openModal = (setModal) => {
         setModal(true);

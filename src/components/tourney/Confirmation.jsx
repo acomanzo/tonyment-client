@@ -43,6 +43,11 @@ export default function Confirmation({open, confirm, onClose, tourney, context})
             dialogContentText = 'Are you sure you want to finalize the bracket? By doing so, registration will close.';
             acceptText = 'Yes'
             break;
+        default:
+            title = 'Error';
+            dialogContentText = 'Something went wrong';
+            acceptText = "Don't click me";
+            break;
     }
 
     return (

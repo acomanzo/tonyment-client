@@ -135,9 +135,9 @@ export default function PlayerDetail(props) {
 
     const { userId } = useContext(AuthContext);
 
-    const [updateSet, _] = useMutation(UPDATE_SET);
+    const [updateSet] = useMutation(UPDATE_SET);
 
-    const [updateTourney, __] = useMutation(UPDATE_TOURNEY);
+    const [updateTourney] = useMutation(UPDATE_TOURNEY);
 
     const { loading, error, data } = useQuery(GET_USER, {
         variables: {
