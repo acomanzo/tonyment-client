@@ -57,18 +57,12 @@ export default function TourneyDetail(props) {
 
     const [snackbar, setSnackbar] = useState(false);
 
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
     const { isAuthenticated, userId } = useContext(AuthContext);
 
     const [connectTourney] = useMutation(TOURNEY_CONNECT_COMPETITOR, {
         update(cache, {data: {updateTourneys}}) {
-            // const data = cache.readQuery({
-            //     query: GET_TOURNEY,
-            //     variables: {
-            //         tourney: {
-            //             id: props.match.params.id
-            //         }
-            //     }
-            // });
             cache.writeQuery({
                 query: GET_TOURNEY,
                 variables: {
@@ -83,14 +77,6 @@ export default function TourneyDetail(props) {
 
     const [disconnectTourney] = useMutation(TOURNEY_DISCONNECT_COMPETITOR, {
         update(cache, {data: {updateTourneys}}) {
-            // const data = cache.readQuery({
-            //     query: GET_TOURNEY, 
-            //     variables: {
-            //         tourney: {
-            //             id: props.match.params.id 
-            //         }
-            //     }
-            // });
             cache.writeQuery({
                 query: GET_TOURNEY, 
                 variables: {
@@ -145,10 +131,17 @@ export default function TourneyDetail(props) {
                         }
                     }
                 }
-            }
+            },
+        })
+        .then(() => {
+            setSnackbarMessage("Successfully registered");
+            setSnackbar(true);
+        })
+        .catch(err => {
+            console.warn(err);
+            setSnackbarMessage('An error occurred. Try again later.');
+            setSnackbar(true);
         });
-
-        setSnackbar(true);
     };
 
     const deregister = e => {
@@ -168,9 +161,15 @@ export default function TourneyDetail(props) {
                     }
                 }
             },
+        }).then(() => {
+            setSnackbarMessage("Successfully deregistered");
+            setSnackbar(true);
+        })
+        .catch(err => {
+            console.warn(err);
+            setSnackbarMessage('An error occurred. Try again later.');
+            setSnackbar(true);
         });
-
-        setSnackbar(true);
     };
 
     function registerButton() {
@@ -194,7 +193,7 @@ export default function TourneyDetail(props) {
                             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                             autoHideDuration={3000} 
                             onClose={() => setSnackbar(false)}
-                            message={isRegistered ? "Successfully registered" : "Successfully deregistered"}
+                            message={snackbarMessage}
                             key={"bottomright"}
                         /> 
                     </>
