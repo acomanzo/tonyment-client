@@ -52,7 +52,8 @@ const NEW_TOURNEY = gql`
 export default function Organize(props) {
 
     const [name, setName] = useState('');
-    const [datetime, setDatetime] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
 
     const classes = useStyles();
 
@@ -72,8 +73,6 @@ export default function Organize(props) {
     
     const submit = e => {
         e.preventDefault();
-        const date = datetime.substring(0, datetime.indexOf('T'));
-        const time = datetime.substring(datetime.indexOf('T') + 1);
         createTourney({
             variables: {
                 newTourney: {
@@ -114,13 +113,23 @@ export default function Organize(props) {
                         required 
                     />
                     <TextField 
-                        id="datetime"
+                        id="date"
                         label="Date"
-                        type="datetime-local"
+                        type="date"
+                        InputLabelProps={{
+                            shrink: true, 
+                        }}
+                        onChange={e => setDate(e.target.value)}
+                        required
+                    />
+                    <TextField 
+                        id="time"
+                        label="Time"
+                        type="time"
                         InputLabelProps={{
                             shrink: true 
                         }}
-                        onChange={e => setDatetime(e.target.value)}
+                        onChange={e => setTime(e.target.value)}
                         required
                     />
                     <Button 
